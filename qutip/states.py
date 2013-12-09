@@ -616,3 +616,128 @@ shape = [8, 1], type = ket
 
     """
     return tensor([fock(dims[i], s) for i, s in enumerate(state)])
+
+
+def phase_basis(N, m, phi0=0):
+    """
+    Basis vector for the mth phase of the Pegg-Barnett phase operator.
+
+    Parameters
+    ----------
+    N : int
+        Number of basis vectors in Hilbert space.
+    m : int
+        Integer corresponding to the mth discrete phase phi_m=phi0+2*pi*m/N
+    phi0 : float (default=0)
+        Reference phase angle.
+
+    Returns
+    -------
+    state : qobj
+        Ket vector for mth Pegg-Barnett phase operator basis state.
+
+    Notes
+    -----
+    The Pegg-Barnett basis states form a complete set over the truncated
+    Hilbert space.
+
+    """
+    phim = phi0 + (2.0 * np.pi * m) / N
+    n = np.arange(N).reshape((N, 1))
+    data = 1.0 / np.sqrt(N) * np.exp(1.0j * n * phim)
+    return Qobj(data)
+
+
+def zero_ket(N, dims=None):
+    """
+    Creates the zero ket vector with shape Nx1 and
+    dimensions `dims`.
+
+    Parameters
+    ----------
+    N : int
+        Hilbert space dimensionality
+    dims : list
+        Optional dimensions if ket corresponds to
+        a composite Hilbert space.
+
+    Returns
+    -------
+    zero_ket : qobj
+        Zero ket on given Hilbert space.
+
+    """
+    return Qobj(sp.csr_matrix((N, 1), dtype=complex), dims=dims)
+
+
+def spin_state(j, m, type='ket'):
+    """Generates the spin state |j, m>, i.e.  the eigenstate
+    of the spin-j Sz operator with eigenvalue m.
+
+    Parameters
+    ----------
+    j : float
+        The spin of the state ().
+
+    m : int
+        Eigenvalue of the spin-j Sz operator.
+
+    type : string {'ket', 'bra', 'dm'}
+        Type of state to generate.
+
+    Returns
+    -------
+    state : qobj
+        Qobj quantum object for spin state
+
+    """
+    J = 2 * j + 1
+
+    if type == 'ket':
+        return basis(int(J), int(j - m))
+    elif type == 'bra':
+        return basis(int(J), int(j - m)).dag()
+    elif type == 'dm':
+        return fock_dm(int(J), int(j - m))
+    else:
+        raise ValueError("invalid value keyword argument 'type'")
+
+
+def spin_coherent(j, theta, phi, type='ket'):
+    """Generates the spin state |j, m>, i.e.  the eigenstate
+    of the spin-j Sz operator with eigenvalue m.
+
+    Parameters
+    ----------
+    j : float
+        The spin of the state.
+
+    theta : float
+        Angle from z axis.
+
+    phi : float
+        Angle from x axis.
+
+    type : string {'ket', 'bra', 'dm'}
+        Type of state to generate.
+
+    Returns
+    -------
+    state : qobj
+        Qobj quantum object for spin coherent state
+
+    """
+    Sp = jmat(j, '+')
+    Sm = jmat(j, '-')
+    psi = (0.5 * theta * np.exp(1j * phi) * Sm - 
+           0.5 * theta * np.exp(-1j * phi) * Sp).expm() * spin_state(j, j)
+
+    if type == 'ket':
+        return psi
+    elif type == 'bra':
+        return psi.dag()
+    elif type == 'dm':
+        return ket2dm(psi)
+    else:
+        raise ValueError("invalid value keyword argument 'type'")
+
