@@ -29,6 +29,14 @@ Operating System :: Windows
 """
 
 # import statements
+#
+# The usual toolchain used to setup a QuTiP install is the
+# ``numpy.distutils.core.setup`` tool.  Instead I switched to
+# ``setuptools.setup``.  The advantage of setuptools is that the module can be
+# installed in developer mode, which lets us import ``qutip`` in a python shell
+# anywhere on the system (i.e. not necessarily in the source directory) and 
+# have the imported module up-to-date with recent code changes.
+#
 import os
 import sys
 import shutil
@@ -43,7 +51,8 @@ from glob import glob
 from os.path import splitext, basename, join as pjoin
 from os import walk
 import numpy as np
-from numpy.distutils.core import setup
+#from numpy.distutils.core import setup
+from setuptools import setup, find_packages
 from numpy.distutils.system_info import get_info
 
 # all information about QuTiP goes here-------
