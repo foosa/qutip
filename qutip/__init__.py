@@ -251,6 +251,7 @@ from qutip.eseries import *
 from qutip.steady import *
 from qutip.correlation import *
 from qutip.propagator import *
+from qutip.trotter import *
 from qutip.floquet import *
 from qutip.bloch_redfield import *
 
